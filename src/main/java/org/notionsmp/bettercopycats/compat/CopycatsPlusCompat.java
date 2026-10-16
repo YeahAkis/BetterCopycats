@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import org.notionsmp.bettercopycats.CopycatSupport;
 
 public final class CopycatsPlusCompat {
+    private static final double BOTTOM_SLAB_OFFSET = -0.5D;
+
     private CopycatsPlusCompat() {
     }
 
@@ -32,15 +34,25 @@ public final class CopycatsPlusCompat {
         return null;
     }
 
+    public static double surfaceOffset(BlockGetter level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof CopycatSlabBlock)) {
+            return 0.0D;
+        }
+        if (state.getValue(CopycatSlabBlock.AXIS) != Direction.Axis.Y) {
+            return 0.0D;
+        }
+        return state.getValue(CopycatSlabBlock.SLAB_TYPE) == SlabType.BOTTOM ? BOTTOM_SLAB_OFFSET : 0.0D;
+    }
+
     @Nullable
     private static CopycatSupport.Surface slabSurface(BlockGetter level, BlockPos pos, BlockState state) {
         if (state.getValue(CopycatSlabBlock.AXIS) != Direction.Axis.Y) {
             return null;
         }
-        if (state.getValue(CopycatSlabBlock.SLAB_TYPE) == SlabType.BOTTOM) {
-            return null;
-        }
-        BlockState material = IMultiStateCopycatBlock.getMaterial(level, pos, SlabType.TOP.getSerializedName());
-        return new CopycatSupport.Surface(material, 0.0D);
+        boolean bottomOnly = state.getValue(CopycatSlabBlock.SLAB_TYPE) == SlabType.BOTTOM;
+        String part = (bottomOnly ? SlabType.BOTTOM : SlabType.TOP).getSerializedName();
+        BlockState material = IMultiStateCopycatBlock.getMaterial(level, pos, part);
+        return new CopycatSupport.Surface(material, bottomOnly ? BOTTOM_SLAB_OFFSET : 0.0D);
     }
 }

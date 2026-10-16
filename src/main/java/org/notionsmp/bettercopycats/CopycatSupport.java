@@ -7,7 +7,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.fml.ModList;
 import org.notionsmp.bettercopycats.compat.CopycatsPlusCompat;
 
@@ -31,6 +35,33 @@ public final class CopycatSupport {
             return CopycatsPlusCompat.topSurface(level, pos, state);
         }
         return null;
+    }
+
+    public static double surfaceOffset(BlockGetter level, BlockPos pos) {
+        if (!isCopycatsPlusLoaded()) {
+            return 0.0D;
+        }
+        return CopycatsPlusCompat.surfaceOffset(level, pos);
+    }
+
+    public static boolean canBeLowered(BlockBehaviour.BlockStateBase state) {
+        return state.getBlock() instanceof BushBlock && state.hasOffsetFunction();
+    }
+
+    public static double plantOffset(BlockGetter level, BlockPos pos, BlockBehaviour.BlockStateBase state) {
+        if (!(state.getBlock() instanceof BushBlock)) {
+            return 0.0D;
+        }
+        BlockPos soilPos = pos.below();
+        if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
+            soilPos = soilPos.below();
+        }
+        double offset = surfaceOffset(level, soilPos);
+        if (offset == 0.0D || !canBeLowered(state)) {
+            return 0.0D;
+        }
+        return offset;
     }
 
     @Nullable

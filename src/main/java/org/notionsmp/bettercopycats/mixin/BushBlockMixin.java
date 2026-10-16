@@ -26,6 +26,9 @@ public abstract class BushBlockMixin {
         if (surface == null) {
             return;
         }
+        if (surface.yOffset() != 0.0D && !CopycatSupport.canBeLowered(state)) {
+            return;
+        }
         BlockState soil = surface.material();
         TriState decision = soil.canSustainPlant(level, soilPos, Direction.UP, state);
         boolean supported = decision.isDefault() ? this.mayPlaceOn(soil, level, soilPos) : decision.isTrue();
