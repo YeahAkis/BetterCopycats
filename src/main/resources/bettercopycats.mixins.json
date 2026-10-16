@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.notionsmp.bettercopycats.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BushBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
