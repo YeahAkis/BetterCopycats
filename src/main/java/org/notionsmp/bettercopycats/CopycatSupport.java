@@ -12,6 +12,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.fml.ModList;
 import org.notionsmp.bettercopycats.compat.CopycatsPlusCompat;
 
@@ -62,6 +65,32 @@ public final class CopycatSupport {
             return 0.0D;
         }
         return offset;
+    }
+
+    @Nullable
+    public static BlockHitResult pickLoweredPlant(BlockGetter level, Vec3 from, Vec3 to, CollisionContext context, double maxDistanceSqr) {
+        if (!isCopycatsPlusLoaded()) {
+            return null;
+        }
+        BlockHitResult[] best = new BlockHitResult[1];
+        double[] bestDistance = {maxDistanceSqr};
+        BlockGetter.<Void, BlockGetter>traverseBlocks(from, to, level, (getter, cell) -> {
+            BlockPos plantPos = cell.above().immutable();
+            BlockState plant = getter.getBlockState(plantPos);
+            if (plantOffset(getter, plantPos, plant) == 0.0D) {
+                return null;
+            }
+            BlockHitResult hit = plant.getShape(getter, plantPos, context).clip(from, to, plantPos);
+            if (hit != null) {
+                double distance = hit.getLocation().distanceToSqr(from);
+                if (distance < bestDistance[0]) {
+                    bestDistance[0] = distance;
+                    best[0] = hit;
+                }
+            }
+            return null;
+        }, getter -> null);
+        return best[0];
     }
 
     @Nullable
