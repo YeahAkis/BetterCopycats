@@ -10,7 +10,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -55,11 +54,7 @@ public final class CopycatSupport {
     }
 
     public static boolean canBeLowered(BlockBehaviour.BlockStateBase state) {
-        Block block = state.getBlock();
-        if (block instanceof DoublePlantBlock) {
-            return hasNoCollision(state);
-        }
-        return block instanceof BushBlock && state.hasOffsetFunction();
+        return state.getBlock() instanceof BushBlock && (state.hasOffsetFunction() || hasNoCollision(state));
     }
 
     public static double plantOffset(BlockGetter level, BlockPos pos, BlockBehaviour.BlockStateBase state) {

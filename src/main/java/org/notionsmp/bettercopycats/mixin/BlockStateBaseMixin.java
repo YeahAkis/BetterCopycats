@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -29,7 +28,7 @@ public abstract class BlockStateBaseMixin {
     @Inject(method = "hasOffsetFunction", at = @At("RETURN"), cancellable = true)
     private void bettercopycats$plantsHaveOffset(CallbackInfoReturnable<Boolean> cir) {
         BlockBehaviour.BlockStateBase self = (BlockBehaviour.BlockStateBase) (Object) this;
-        if (!cir.getReturnValue() && self.getBlock() instanceof DoublePlantBlock && CopycatSupport.hasNoCollision(self)) {
+        if (!cir.getReturnValue() && self.getBlock() instanceof BushBlock && CopycatSupport.hasNoCollision(self)) {
             cir.setReturnValue(true);
         }
     }
