@@ -34,6 +34,20 @@ public final class CopycatsPlusCompat {
         return null;
     }
 
+    @Nullable
+    public static BlockState mapMaterial(BlockGetter level, BlockPos pos, BlockState state) {
+        Block block = state.getBlock();
+        if (block instanceof CopycatSlabBlock && state.getValue(CopycatSlabBlock.AXIS) == Direction.Axis.Y) {
+            SlabType type = state.getValue(CopycatSlabBlock.SLAB_TYPE);
+            String part = (type == SlabType.BOTTOM ? SlabType.BOTTOM : SlabType.TOP).getSerializedName();
+            return IMultiStateCopycatBlock.getMaterial(level, pos, part);
+        }
+        if (block instanceof ICopycatBlock) {
+            return ICopycatBlock.getMaterial(level, pos);
+        }
+        return null;
+    }
+
     public static boolean isCopycat(Block block) {
         return block instanceof ICopycatBlock;
     }

@@ -2,6 +2,7 @@ package org.notionsmp.bettercopycats;
 
 import javax.annotation.Nullable;
 
+import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.decoration.copycat.CopycatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,7 +23,9 @@ import org.notionsmp.bettercopycats.compat.CopycatsPlusCompat;
 
 public final class CopycatSupport {
     private static final String COPYCATS_PLUS_ID = "copycats";
+    private static final String FRAMED_BLOCKS_ID = "framedblocks";
     private static Boolean copycatsPlusLoaded;
+    private static Boolean framedBlocksLoaded;
 
     private CopycatSupport() {
     }
@@ -111,6 +114,33 @@ public final class CopycatSupport {
         if (plant.getBlock() instanceof BushBlock && !plant.canSurvive(level, above)) {
             level.destroyBlock(above, true);
         }
+    }
+
+    @Nullable
+    public static BlockState mapMaterial(BlockGetter level, BlockPos pos, BlockState state) {
+        BlockState material;
+        if (state.getBlock() instanceof CopycatBlock) {
+            material = CopycatBlock.getMaterial(level, pos);
+        } else if (isCopycatsPlusLoaded()) {
+            material = CopycatsPlusCompat.mapMaterial(level, pos, state);
+        } else {
+            return null;
+        }
+        if (material == null || material.isAir() || AllBlocks.COPYCAT_BASE.has(material)) {
+            return null;
+        }
+        return material;
+    }
+
+    public static boolean isFramedBlocksLoaded() {
+        if (framedBlocksLoaded == null) {
+            ModList mods = ModList.get();
+            if (mods == null) {
+                return false;
+            }
+            framedBlocksLoaded = mods.isLoaded(FRAMED_BLOCKS_ID);
+        }
+        return framedBlocksLoaded;
     }
 
     @Nullable

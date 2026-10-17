@@ -9,7 +9,9 @@
     "ServerLevelMixin"
   ],
   "client": [
-    "GameRendererMixin"
+    "GameRendererMixin",
+    "xaero.XaeroMinimapWriterMixin",
+    "xaero.XaeroWorldMapWriterMixin"
   ],
   "injectors": {
     "defaultRequire": 1
