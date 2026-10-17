@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.simibubi.create.content.decoration.copycat.CopycatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
@@ -93,12 +94,33 @@ public final class CopycatSupport {
         return best[0];
     }
 
+    public static void recheckPlantAbove(ServerLevel level, BlockPos pos, BlockState state) {
+        if (!isCopycat(state.getBlock())) {
+            return;
+        }
+        BlockPos above = pos.above();
+        if (!level.isLoaded(above)) {
+            return;
+        }
+        BlockState plant = level.getBlockState(above);
+        if (plant.getBlock() instanceof BushBlock && !plant.canSurvive(level, above)) {
+            level.destroyBlock(above, true);
+        }
+    }
+
     @Nullable
     public static Surface fullTopSurface(BlockGetter level, BlockPos pos, BlockState state, BlockState material) {
         if (!Block.isFaceFull(state.getCollisionShape(level, pos), Direction.UP)) {
             return null;
         }
         return new Surface(material, 0.0D);
+    }
+
+    private static boolean isCopycat(Block block) {
+        if (block instanceof CopycatBlock) {
+            return true;
+        }
+        return isCopycatsPlusLoaded() && CopycatsPlusCompat.isCopycat(block);
     }
 
     private static boolean isCopycatsPlusLoaded() {

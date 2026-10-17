@@ -34,6 +34,10 @@ public final class CopycatsPlusCompat {
         return null;
     }
 
+    public static boolean isCopycat(Block block) {
+        return block instanceof ICopycatBlock;
+    }
+
     public static double surfaceOffset(BlockGetter level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof CopycatSlabBlock)) {
