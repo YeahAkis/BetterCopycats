@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'net.neoforged.moddev' version '2.0.148'
+    id 'me.modmuss50.mod-publish-plugin' version '1.1.0'
 }
 
 version = mod_version
@@ -94,5 +95,62 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+String changelogFor(String text, String ver) {
+    List<String> section = []
+    boolean inside = false
+    for (String line : text.readLines()) {
+        if (line.startsWith('## ')) {
+            if (inside) {
+                break
+            }
+            inside = line.substring(3).trim() == ver
+        } else if (inside) {
+            section.add(line)
+        }
+    }
+    String entry = section.join('\n').trim()
+    if (entry.isEmpty()) {
+        throw new GradleException("CHANGELOG.md has no entry for ${ver}")
+    }
+    return entry
+}
+
+def modrinthToken = providers.environmentVariable('MODRINTH_TOKEN').orElse(providers.gradleProperty('modrinthToken'))
+def curseforgeToken = providers.environmentVariable('CURSEFORGE_TOKEN').orElse(providers.gradleProperty('curseforgeToken'))
+def rehearsal = !modrinthToken.present && !curseforgeToken.present
+
+publishMods {
+    file = tasks.jar.archiveFile
+    version = mod_version
+    displayName = "${mod_name} ${mod_version}"
+    changelog = providers.fileContents(layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
+    type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
+    modLoaders.add('neoforge')
+    dryRun = rehearsal
+
+    if (modrinth_project_id && (rehearsal || modrinthToken.present)) {
+        modrinth {
+            projectId = modrinth_project_id
+            accessToken = modrinthToken
+            minecraftVersions.add(minecraft_version)
+            requires('create')
+            optional('copycats')
+        }
+    }
+
+    if (curseforge_project_id && (rehearsal || curseforgeToken.present)) {
+        curseforge {
+            projectId = curseforge_project_id
+            accessToken = curseforgeToken
+            minecraftVersions.add(minecraft_version)
+            javaVersions.add(JavaVersion.VERSION_21)
+            clientRequired = true
+            serverRequired = true
+            requires('create')
+            optional('copycats')
+        }
     }
 }
