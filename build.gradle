@@ -18,10 +18,14 @@ repositories {
 }
 
 base {
-    archivesName = mod_id
+    archivesName = mod_name
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+tasks.named('jar') {
+    archiveVersion = "${mod_version}-${minecraft_version}"
+}
 
 neoForge {
     version = project.neo_version
