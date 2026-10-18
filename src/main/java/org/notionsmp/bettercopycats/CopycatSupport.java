@@ -11,6 +11,10 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -36,17 +40,20 @@ public final class CopycatSupport {
     @Nullable
     public static Surface topSurface(BlockGetter level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
+        Surface surface = null;
         if (state.getBlock() instanceof CopycatBlock) {
-            return fullTopSurface(level, pos, state, CopycatBlock.getMaterial(level, pos));
+            surface = fullTopSurface(level, pos, state, CopycatBlock.getMaterial(level, pos));
+        } else if (isCopycatsPlusLoaded()) {
+            surface = CopycatsPlusCompat.topSurface(level, pos, state);
         }
-        if (isCopycatsPlusLoaded()) {
-            return CopycatsPlusCompat.topSurface(level, pos, state);
+        if (surface != null && surface.yOffset() != 0.0D && !Config.lowerOnBottomSlabs()) {
+            return null;
         }
-        return null;
+        return surface;
     }
 
     public static double surfaceOffset(BlockGetter level, BlockPos pos) {
-        if (!isCopycatsPlusLoaded()) {
+        if (!isCopycatsPlusLoaded() || !Config.lowerOnBottomSlabs()) {
             return 0.0D;
         }
         return CopycatsPlusCompat.surfaceOffset(level, pos);
@@ -74,6 +81,18 @@ public final class CopycatSupport {
             return 0.0D;
         }
         return offset;
+    }
+
+    public static boolean isPlantAllowed(BlockState plant) {
+        Block block = plant.getBlock();
+        if (block instanceof SaplingBlock && !Config.allowSaplings()) {
+            return false;
+        }
+        boolean crop = block instanceof CropBlock || block instanceof StemBlock || block instanceof NetherWartBlock;
+        if (crop && !Config.allowCrops()) {
+            return false;
+        }
+        return !Config.isBlacklisted(block);
     }
 
     @Nullable
@@ -118,6 +137,9 @@ public final class CopycatSupport {
 
     @Nullable
     public static BlockState mapMaterial(BlockGetter level, BlockPos pos, BlockState state) {
+        if (!Config.mapSupport()) {
+            return null;
+        }
         BlockState material;
         if (state.getBlock() instanceof CopycatBlock) {
             material = CopycatBlock.getMaterial(level, pos);

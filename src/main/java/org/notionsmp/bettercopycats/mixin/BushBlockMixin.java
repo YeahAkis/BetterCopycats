@@ -26,6 +26,9 @@ public abstract class BushBlockMixin {
         if (surface == null) {
             return;
         }
+        if (!CopycatSupport.isPlantAllowed(state)) {
+            return;
+        }
         if (surface.yOffset() != 0.0D && !CopycatSupport.canBeLowered(state)) {
             return;
         }
