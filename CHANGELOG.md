@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Copycat skins now show on vanilla maps
+
 ## 1.0.0
 
 - Plants can be placed on copycats wearing a skin that supports them
