@@ -27,14 +27,6 @@ public abstract class BlockStateBaseMixin {
         }
     }
 
-    @Inject(method = "getOffsetType", at = @At("RETURN"), cancellable = true)
-    private void bettercopycats$plantsHaveOffset(CallbackInfoReturnable<BlockBehaviour.OffsetType> cir) {
-        BlockBehaviour.BlockStateBase self = (BlockBehaviour.BlockStateBase) (Object) this;
-        if (cir.getReturnValue() == BlockBehaviour.OffsetType.NONE && self.getBlock() instanceof BushBlock && CopycatSupport.hasNoCollision(self)) {
-            cir.setReturnValue(BlockBehaviour.OffsetType.XZ);
-        }
-    }
-
     @Inject(method = "getShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/shapes/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;",
             at = @At("RETURN"), cancellable = true)
     private void bettercopycats$lowerShape(BlockGetter level, BlockPos pos, CollisionContext context, CallbackInfoReturnable<VoxelShape> cir) {

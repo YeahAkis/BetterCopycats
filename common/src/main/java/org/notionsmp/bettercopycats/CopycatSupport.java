@@ -65,7 +65,7 @@ public final class CopycatSupport {
     }
 
     public static boolean canBeLowered(BlockBehaviour.BlockStateBase state) {
-        return state.getBlock() instanceof BushBlock && (state.getOffsetType() != BlockBehaviour.OffsetType.NONE || hasNoCollision(state));
+        return state.getBlock() instanceof BushBlock && (state.getBlock().getOffsetType() != BlockBehaviour.OffsetType.NONE || hasNoCollision(state));
     }
 
     public static double plantOffset(BlockGetter level, BlockPos pos, BlockBehaviour.BlockStateBase state) {

@@ -69,6 +69,9 @@ public final class Config {
     }
 
     static void onLoad(final ModConfig config) {
+        if (!config.getModId().equals(BetterCopycats.MODID)) {
+            return;
+        }
         lowerOnBottomSlabs = LOWER_ON_BOTTOM_SLABS.get();
         allowSaplings = ALLOW_SAPLINGS.get();
         allowCrops = ALLOW_CROPS.get();
