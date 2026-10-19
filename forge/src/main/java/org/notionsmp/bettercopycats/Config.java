@@ -7,36 +7,36 @@ import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-@EventBusSubscriber(modid = BetterCopycats.MODID, bus = EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = BetterCopycats.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Config {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ModConfigSpec.BooleanValue LOWER_ON_BOTTOM_SLABS = BUILDER
+    private static final ForgeConfigSpec.BooleanValue LOWER_ON_BOTTOM_SLABS = BUILDER
             .comment("Place plants half a block lower on bottom copycat slabs. When off, plants cannot be placed on bottom slabs at all")
             .define("lowerPlantsOnBottomSlabs", true);
 
-    private static final ModConfigSpec.BooleanValue ALLOW_SAPLINGS = BUILDER
+    private static final ForgeConfigSpec.BooleanValue ALLOW_SAPLINGS = BUILDER
             .comment("Allow saplings on copycats. Growing trees replace the block below with dirt, which would destroy the copycat")
             .define("allowSaplings", false);
 
-    private static final ModConfigSpec.BooleanValue ALLOW_CROPS = BUILDER
+    private static final ForgeConfigSpec.BooleanValue ALLOW_CROPS = BUILDER
             .comment("Allow crops, stems and nether wart on copycats. They grow at the slowest rate because the block below is not farmland")
             .define("allowCrops", false);
 
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> PLANT_BLACKLIST = BUILDER
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLANT_BLACKLIST = BUILDER
             .comment("Block ids of plants that can never be placed on copycats, for example minecraft:poppy")
             .defineListAllowEmpty("plantBlacklist", List.of(), Config::isBlockId);
 
-    private static final ModConfigSpec.BooleanValue MAP_SUPPORT = BUILDER
+    private static final ForgeConfigSpec.BooleanValue MAP_SUPPORT = BUILDER
             .comment("Show the skin of copycats on maps. Vanilla maps are handled by the server, Xaero's Minimap and World Map by the client")
             .define("mapSupport", true);
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+    static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private static volatile boolean lowerOnBottomSlabs = true;
     private static volatile boolean allowSaplings = false;

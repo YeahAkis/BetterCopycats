@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'idea'
-    id 'net.neoforged.moddev'
+    id 'net.neoforged.moddev.legacyforge'
     id 'me.modmuss50.mod-publish-plugin'
 }
 
@@ -11,7 +11,7 @@ group = mod_group_id
 repositories {
     mavenLocal()
     maven { url = 'https://maven.createmod.net' }
-    maven { url = 'https://maven.ithundxr.dev/snapshots' }
+    maven { url = 'https://maven.tterrag.com' }
     maven {
         url = 'https://api.modrinth.com/maven'
         content { includeGroup 'maven.modrinth' }
@@ -22,7 +22,7 @@ base {
     archivesName = mod_name
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets.main {
     java.srcDir rootProject.file('common/src/main/java')
@@ -30,11 +30,22 @@ sourceSets.main {
 }
 
 tasks.named('jar') {
-    archiveVersion = "${mod_version}-${minecraft_version}"
+    archiveVersion = "${mod_version}-${minecraft_version}-forge"
+    manifest.attributes('MixinConfigs': "${mod_id}.mixins.json")
 }
 
-neoForge {
-    version = project.neo_version
+tasks.named('compileJava', JavaCompile) {
+    var mixinConfigs = "${mod_id}.mixins.json"
+    inputs.property 'mixinConfigs', mixinConfigs
+    doLast {
+        var manifest = destinationDirectory.file('META-INF/MANIFEST.MF').get().asFile
+        manifest.parentFile.mkdirs()
+        manifest.text = "Manifest-Version: 1.0\nMixinConfigs: ${mixinConfigs}\n"
+    }
+}
+
+legacyForge {
+    version = "${minecraft_version}-${forge_version}"
 
     parchment {
         mappingsVersion = project.parchment_mappings_version
@@ -64,21 +75,28 @@ neoForge {
     }
 }
 
-dependencies {
-    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    implementation "net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}"
-    implementation "com.tterrag.registrate:Registrate:${registrate_version}"
-    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
-    runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+}
 
-    implementation "maven.modrinth:copycats:${copycats_version}"
+dependencies {
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    runtimeOnly "io.github.llamalad7:mixinextras-forge:${mixinextras_version}"
+
+    modImplementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    modImplementation "net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"
+    modImplementation "com.tterrag.registrate:Registrate:${registrate_version}"
+    modCompileOnly "dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}"
+    modRuntimeOnly "dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"
+
+    modImplementation "maven.modrinth:copycats:${copycats_version}"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [minecraft_version      : minecraft_version,
                              minecraft_version_range: minecraft_version_range,
-                             neo_version            : neo_version,
-                             neo_version_range      : neo_version_range,
+                             forge_version          : forge_version,
+                             forge_version_range    : forge_version_range,
                              loader_version_range   : loader_version_range,
                              create_version_range   : create_version_range,
                              mod_id                 : mod_id,
@@ -94,7 +112,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 }
 
 sourceSets.main.resources.srcDir generateModMetadata
-neoForge.ideSyncTask generateModMetadata
+legacyForge.ideSyncTask generateModMetadata
 
 idea {
     module {
@@ -128,11 +146,12 @@ def curseforgeToken = providers.environmentVariable('CURSEFORGE_TOKEN').orElse(p
 def rehearsal = !modrinthToken.present && !curseforgeToken.present
 
 publishMods {
-    file = tasks.jar.archiveFile
+    file = tasks.reobfJar.archiveFile
     version = mod_version
     displayName = "${mod_name} ${mod_version}"
     changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
     type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
+    modLoaders.add('forge')
     modLoaders.add('neoforge')
     dryRun = rehearsal
 
@@ -151,7 +170,7 @@ publishMods {
             projectId = curseforge_project_id
             accessToken = curseforgeToken
             minecraftVersions.add(minecraft_version)
-            javaVersions.add(JavaVersion.VERSION_21)
+            javaVersions.add(JavaVersion.VERSION_17)
             clientRequired = true
             serverRequired = true
             requires('create')

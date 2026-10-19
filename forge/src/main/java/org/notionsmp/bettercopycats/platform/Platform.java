@@ -1,6 +1,6 @@
 package org.notionsmp.bettercopycats.platform;
 
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 public final class Platform {
     private Platform() {
