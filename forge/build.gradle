@@ -149,7 +149,6 @@ publishMods {
     changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
     type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
     modLoaders.add('forge')
-    modLoaders.add('neoforge')
     dryRun = rehearsal
 
     if (modrinth_project_id && (rehearsal || modrinthToken.present)) {
