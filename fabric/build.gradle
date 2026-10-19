@@ -69,13 +69,17 @@ dependencies {
     devMods "maven.modrinth:copycats:${copycats_version}"
 }
 
-var copyDevMods = tasks.register('copyDevMods', Copy) {
+var syncDevMods = tasks.register('syncDevMods', Sync) {
     from configurations.devMods
     into layout.projectDirectory.dir('run/mods')
+    preserve {
+        include '**'
+        exclude 'create-fabric-*.jar', 'copycats-*.jar'
+    }
 }
 
 tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach {
-    dependsOn copyDevMods
+    dependsOn syncDevMods
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
