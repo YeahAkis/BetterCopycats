@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "license": "${mod_license}",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.notionsmp.bettercopycats.BetterCopycats"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "${loader_version_range}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_dependency}",
+    "create": "${create_dependency}",
+    "forgeconfigapiport": ">=${forge_config_api_port_version}"
+  },
+  "suggests": {
+    "copycats": "*"
+  }
+}

@@ -1,0 +1,169 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'fabric-loom'
+    id 'me.modmuss50.mod-publish-plugin'
+}
+
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+    maven { url = 'https://maven.parchmentmc.org' }
+    maven { url = 'https://mvn.devos.one/releases' }
+    maven { url = 'https://mvn.devos.one/snapshots' }
+    maven { url = 'https://raw.githubusercontent.com/Fuzss/modresources/main/maven' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+
+base {
+    archivesName = mod_name
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets.main {
+    java.srcDir rootProject.file('common/src/main/java')
+    resources.srcDir rootProject.file('common/src/main/resources')
+}
+
+tasks.named('jar') {
+    archiveVersion = "${mod_version}-${minecraft_version}-fabric"
+}
+
+tasks.named('remapJar') {
+    archiveVersion = "${mod_version}-${minecraft_version}-fabric"
+    notCompatibleWithConfigurationCache('loom reads the project while remapping')
+}
+
+configurations {
+    devMods {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_mappings_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    compileOnly "com.google.code.findbugs:jsr305:${jsr305_version}"
+
+    modCompileOnly "maven.modrinth:create-fabric:${create_version}"
+    modCompileOnly("io.github.fabricators_of_create.Porting-Lib:base:${porting_lib_version}") { transitive = false }
+    modCompileOnly("com.tterrag.registrate_fabric:Registrate:${registrate_version}") { transitive = false }
+    modCompileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_port_version}") { transitive = false }
+
+    modCompileOnly "maven.modrinth:copycats:${copycats_version}"
+
+    devMods "maven.modrinth:create-fabric:${create_version}"
+    devMods "maven.modrinth:copycats:${copycats_version}"
+}
+
+var copyDevMods = tasks.register('copyDevMods', Copy) {
+    from configurations.devMods
+    into layout.projectDirectory.dir('run/mods')
+}
+
+tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach {
+    dependsOn copyDevMods
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_dependency         : minecraft_dependency,
+                             loader_version_range         : loader_version_range,
+                             create_dependency            : create_dependency,
+                             forge_config_api_port_version: forge_config_api_port_version,
+                             mod_id                       : mod_id,
+                             mod_name                     : mod_name,
+                             mod_license                  : mod_license,
+                             mod_version                  : mod_version,
+                             mod_authors                  : mod_authors,
+                             mod_description              : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+String changelogFor(String text, String ver) {
+    List<String> section = []
+    boolean inside = false
+    for (String line : text.readLines()) {
+        if (line.startsWith('## ')) {
+            if (inside) {
+                break
+            }
+            inside = line.substring(3).trim() == ver
+        } else if (inside) {
+            section.add(line)
+        }
+    }
+    String entry = section.join('\n').trim()
+    if (entry.isEmpty()) {
+        throw new GradleException("CHANGELOG.md has no entry for ${ver}")
+    }
+    return entry
+}
+
+def modrinthToken = providers.environmentVariable('MODRINTH_TOKEN').orElse(providers.gradleProperty('modrinthToken'))
+def curseforgeToken = providers.environmentVariable('CURSEFORGE_TOKEN').orElse(providers.gradleProperty('curseforgeToken'))
+def rehearsal = !modrinthToken.present && !curseforgeToken.present
+
+publishMods {
+    file = tasks.remapJar.archiveFile
+    version = mod_version
+    displayName = "${mod_name} ${mod_version}"
+    changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
+    type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
+    modLoaders.add('fabric')
+    dryRun = rehearsal
+
+    if (modrinth_project_id && (rehearsal || modrinthToken.present)) {
+        modrinth {
+            projectId = modrinth_project_id
+            accessToken = modrinthToken
+            minecraftVersions.add(minecraft_version)
+            requires('create-fabric')
+            requires('fabric-api')
+            optional('copycats')
+        }
+    }
+
+    if (curseforge_project_id && (rehearsal || curseforgeToken.present)) {
+        curseforge {
+            projectId = curseforge_project_id
+            accessToken = curseforgeToken
+            minecraftVersions.add(minecraft_version)
+            javaVersions.add(JavaVersion.VERSION_17)
+            clientRequired = true
+            serverRequired = true
+            requires('create-fabric')
+            requires('fabric-api')
+            optional('copycats')
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name in ['publishMods', 'publishModrinth', 'publishCurseforge']) {
+        notCompatibleWithConfigurationCache('the changelog reads project properties at run time')
+    }
+}
