@@ -5,6 +5,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -49,5 +51,14 @@ public abstract class BlockStateBaseMixin {
             return;
         }
         cir.setReturnValue(shape.move(0.0D, offset, 0.0D));
+    }
+
+    @Inject(method = "getMapColor", at = @At("RETURN"), cancellable = true)
+    private void bettercopycats$useSkinMapColor(BlockGetter level, BlockPos pos, CallbackInfoReturnable<MapColor> cir) {
+        BlockState self = (BlockState) (Object) this;
+        MapColor color = CopycatSupport.mapColor(level, pos, self);
+        if (color != null) {
+            cir.setReturnValue(color);
+        }
     }
 }

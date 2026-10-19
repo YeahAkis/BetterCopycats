@@ -33,7 +33,7 @@ public final class Config {
             .defineListAllowEmpty("plantBlacklist", List.of(), Config::isBlockId);
 
     private static final ModConfigSpec.BooleanValue MAP_SUPPORT = BUILDER
-            .comment("Show the skin of copycats on Xaero's Minimap and World Map. Only matters on the client")
+            .comment("Show the skin of copycats on maps. Vanilla maps are handled by the server, Xaero's Minimap and World Map by the client")
             .define("mapSupport", true);
 
     static final ModConfigSpec SPEC = BUILDER.build();

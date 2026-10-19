@@ -8,7 +8,7 @@ Place flowers and other plants on Create copycats and Copycats+ blocks, based on
 - Copycats+ slabs use the half you actually see from above. A double slab uses its top half and a single top slab uses its own skin, so stone below with moss on top works and the other way around does not.
 - Plants on a bottom slab sit half a block lower, so they stand on the slab instead of floating above it. The hitbox moves with them and you can target them from the side.
 - If the skin underneath is changed to something that cannot hold the plant, the plant breaks and drops.
-- Xaero's Minimap and World Map show the skin of a copycat instead of the plain copycat color.
+- Maps show the skin of a copycat instead of the plain copycat color, on vanilla maps and on Xaero's Minimap and World Map.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ The config lives in `config/bettercopycats-common.toml`.
 | `allowSaplings` | `false` | Allow saplings on copycats. Growing trees replace the block below with dirt, which would destroy the copycat |
 | `allowCrops` | `false` | Allow crops, stems and nether wart on copycats. They grow at the slowest rate because the block below is not farmland |
 | `plantBlacklist` | `[]` | Block ids of plants that can never be placed on copycats |
-| `mapSupport` | `true` | Show copycat skins on the Xaero's maps (client side) |
+| `mapSupport` | `true` | Show copycat skins on vanilla maps (server side) and on the Xaero's maps (client side) |
 
 ## Compatibility
 

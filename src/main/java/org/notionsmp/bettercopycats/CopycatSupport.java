@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -152,6 +153,12 @@ public final class CopycatSupport {
             return null;
         }
         return material;
+    }
+
+    @Nullable
+    public static MapColor mapColor(BlockGetter level, BlockPos pos, BlockState state) {
+        BlockState material = mapMaterial(level, pos, state);
+        return material == null ? null : material.getMapColor(level, pos);
     }
 
     public static boolean isFramedBlocksLoaded() {
