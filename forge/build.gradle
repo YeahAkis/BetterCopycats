@@ -145,7 +145,7 @@ def rehearsal = !modrinthToken.present && !curseforgeToken.present
 publishMods {
     file = tasks.reobfJar.archiveFile
     version = mod_version
-    displayName = "${mod_name} ${mod_version}"
+    displayName = "${mod_name} ${mod_version} (Forge ${minecraft_version})"
     changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
     type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
     modLoaders.add('forge')
