@@ -12,8 +12,8 @@ Place flowers and other plants on Create copycats and Copycats+ blocks, based on
 
 ## Requirements
 
-- Minecraft 1.21.1 with NeoForge 21.1 or newer
-- Create 6.0.8 or newer
+- Minecraft 1.20.1 with Forge 47 or newer, NeoForge 47.1 or newer (the Forge version runs on both), or Fabric with Fabric API
+- Create 6.0.8 or newer, or Create Fabric 6.0.8 or newer
 - Copycats+ is optional. Without it only the copycats from Create itself are supported, and bottom slabs do not exist
 
 The mod has to be installed on both the server and the client.
