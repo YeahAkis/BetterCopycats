@@ -154,3 +154,9 @@ publishMods {
         }
     }
 }
+
+tasks.configureEach {
+    if (name in ['publishMods', 'publishModrinth', 'publishCurseforge']) {
+        notCompatibleWithConfigurationCache('the changelog reads project properties at run time')
+    }
+}
