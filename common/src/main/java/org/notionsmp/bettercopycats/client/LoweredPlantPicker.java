@@ -3,12 +3,12 @@ package org.notionsmp.bettercopycats.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.notionsmp.bettercopycats.CopycatSupport;
+import org.notionsmp.bettercopycats.platform.ClientPlatform;
 
 public final class LoweredPlantPicker {
     private LoweredPlantPicker() {
@@ -20,7 +20,7 @@ public final class LoweredPlantPicker {
             return;
         }
         Vec3 from = player.getEyePosition(partialTicks);
-        double range = player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+        double range = ClientPlatform.blockReach(player);
         Vec3 to = from.add(player.getViewVector(partialTicks).scale(range));
         HitResult current = mc.hitResult;
         double currentDistance = current == null || current.getType() == HitResult.Type.MISS
