@@ -130,7 +130,7 @@ def rehearsal = !modrinthToken.present && !curseforgeToken.present
 publishMods {
     file = tasks.jar.archiveFile
     version = mod_version
-    displayName = "${mod_name} ${mod_version}"
+    displayName = "${mod_name} ${mod_version} (NeoForge ${minecraft_version})"
     changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
     type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
     modLoaders.add('neoforge')
