@@ -6,7 +6,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -27,11 +27,11 @@ public abstract class BlockStateBaseMixin {
         }
     }
 
-    @Inject(method = "hasOffsetFunction", at = @At("RETURN"), cancellable = true)
-    private void bettercopycats$plantsHaveOffset(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "getOffsetType", at = @At("RETURN"), cancellable = true)
+    private void bettercopycats$plantsHaveOffset(CallbackInfoReturnable<BlockBehaviour.OffsetType> cir) {
         BlockBehaviour.BlockStateBase self = (BlockBehaviour.BlockStateBase) (Object) this;
-        if (!cir.getReturnValue() && self.getBlock() instanceof BushBlock && CopycatSupport.hasNoCollision(self)) {
-            cir.setReturnValue(true);
+        if (cir.getReturnValue() == BlockBehaviour.OffsetType.NONE && self.getBlock() instanceof BushBlock && CopycatSupport.hasNoCollision(self)) {
+            cir.setReturnValue(BlockBehaviour.OffsetType.XZ);
         }
     }
 
@@ -54,9 +54,9 @@ public abstract class BlockStateBaseMixin {
     }
 
     @Inject(method = "getMapColor", at = @At("RETURN"), cancellable = true)
-    private void bettercopycats$useSkinMapColor(BlockGetter level, BlockPos pos, CallbackInfoReturnable<MapColor> cir) {
+    private void bettercopycats$useSkinMapColor(BlockGetter level, BlockPos pos, CallbackInfoReturnable<MaterialColor> cir) {
         BlockState self = (BlockState) (Object) this;
-        MapColor color = CopycatSupport.mapColor(level, pos, self);
+        MaterialColor color = CopycatSupport.mapColor(level, pos, self);
         if (color != null) {
             cir.setReturnValue(color);
         }

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -61,7 +61,7 @@ public final class Config {
     }
 
     public static boolean isBlacklisted(Block block) {
-        return plantBlacklist.contains(BuiltInRegistries.BLOCK.getKey(block));
+        return plantBlacklist.contains(Registry.BLOCK.getKey(block));
     }
 
     private static boolean isBlockId(Object value) {

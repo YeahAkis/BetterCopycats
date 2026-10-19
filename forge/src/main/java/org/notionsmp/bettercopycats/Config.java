@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -30,7 +30,7 @@ public final class Config {
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLANT_BLACKLIST = BUILDER
             .comment("Block ids of plants that can never be placed on copycats, for example minecraft:poppy")
-            .defineListAllowEmpty("plantBlacklist", List.of(), Config::isBlockId);
+            .defineListAllowEmpty(List.of("plantBlacklist"), List::of, Config::isBlockId);
 
     private static final ForgeConfigSpec.BooleanValue MAP_SUPPORT = BUILDER
             .comment("Show the skin of copycats on maps. Vanilla maps are handled by the server, Xaero's Minimap and World Map by the client")
@@ -64,7 +64,7 @@ public final class Config {
     }
 
     public static boolean isBlacklisted(Block block) {
-        return plantBlacklist.contains(BuiltInRegistries.BLOCK.getKey(block));
+        return plantBlacklist.contains(Registry.BLOCK.getKey(block));
     }
 
     private static boolean isBlockId(Object value) {

@@ -7,6 +7,6 @@ public final class ClientPlatform {
     }
 
     public static double blockReach(LocalPlayer player) {
-        return player.getBlockReach();
+        return player.getReachDistance();
     }
 }

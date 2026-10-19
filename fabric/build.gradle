@@ -56,11 +56,12 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     compileOnly "com.google.code.findbugs:jsr305:${jsr305_version}"
+    compileOnly "com.electronwill.night-config:core:${night_config_version}"
 
     modCompileOnly "maven.modrinth:create-fabric:${create_version}"
     modCompileOnly("io.github.fabricators_of_create.Porting-Lib:base:${porting_lib_version}") { transitive = false }
     modCompileOnly("com.tterrag.registrate_fabric:Registrate:${registrate_version}") { transitive = false }
-    modCompileOnly("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_port_version}") { transitive = false }
+    modCompileOnly("net.minecraftforge:forgeconfigapiport-fabric:${forge_config_api_port_version}") { transitive = false }
 
     modCompileOnly "maven.modrinth:copycats:${copycats_version}"
 
