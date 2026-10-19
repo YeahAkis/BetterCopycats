@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.notionsmp.bettercopycats.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "bettercopycats.refmap.json",
+  "mixins": [
+    "BlockStateBaseMixin",
+    "BushBlockMixin",
+    "ServerLevelMixin"
+  ],
+  "client": [
+    "GameRendererMixin",
+    "xaero.XaeroMinimapWriterMixin",
+    "xaero.XaeroWorldMapWriterMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
