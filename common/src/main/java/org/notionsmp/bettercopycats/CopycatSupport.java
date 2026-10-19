@@ -23,8 +23,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.fml.ModList;
 import org.notionsmp.bettercopycats.compat.CopycatsPlusCompat;
+import org.notionsmp.bettercopycats.platform.Platform;
 
 public final class CopycatSupport {
     private static final String COPYCATS_PLUS_ID = "copycats";
@@ -163,11 +163,10 @@ public final class CopycatSupport {
 
     public static boolean isFramedBlocksLoaded() {
         if (framedBlocksLoaded == null) {
-            ModList mods = ModList.get();
-            if (mods == null) {
+            if (!Platform.isModListReady()) {
                 return false;
             }
-            framedBlocksLoaded = mods.isLoaded(FRAMED_BLOCKS_ID);
+            framedBlocksLoaded = Platform.isModLoaded(FRAMED_BLOCKS_ID);
         }
         return framedBlocksLoaded;
     }
@@ -189,11 +188,10 @@ public final class CopycatSupport {
 
     private static boolean isCopycatsPlusLoaded() {
         if (copycatsPlusLoaded == null) {
-            ModList mods = ModList.get();
-            if (mods == null) {
+            if (!Platform.isModListReady()) {
                 return false;
             }
-            copycatsPlusLoaded = mods.isLoaded(COPYCATS_PLUS_ID);
+            copycatsPlusLoaded = Platform.isModLoaded(COPYCATS_PLUS_ID);
         }
         return copycatsPlusLoaded;
     }

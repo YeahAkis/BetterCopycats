@@ -1,0 +1,167 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.neoforged.moddev'
+    id 'me.modmuss50.mod-publish-plugin'
+}
+
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+    maven { url = 'https://maven.createmod.net' }
+    maven { url = 'https://maven.ithundxr.dev/snapshots' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+
+base {
+    archivesName = mod_name
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets.main {
+    java.srcDir rootProject.file('common/src/main/java')
+    resources.srcDir rootProject.file('common/src/main/resources')
+}
+
+tasks.named('jar') {
+    archiveVersion = "${mod_version}-${minecraft_version}"
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+dependencies {
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    implementation "net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}"
+    implementation "com.tterrag.registrate:Registrate:${registrate_version}"
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
+    runtimeOnly "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
+
+    implementation "maven.modrinth:copycats:${copycats_version}"
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_version      : minecraft_version,
+                             minecraft_version_range: minecraft_version_range,
+                             neo_version            : neo_version,
+                             neo_version_range      : neo_version_range,
+                             loader_version_range   : loader_version_range,
+                             create_version_range   : create_version_range,
+                             mod_id                 : mod_id,
+                             mod_name               : mod_name,
+                             mod_license            : mod_license,
+                             mod_version            : mod_version,
+                             mod_authors            : mod_authors,
+                             mod_description        : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+String changelogFor(String text, String ver) {
+    List<String> section = []
+    boolean inside = false
+    for (String line : text.readLines()) {
+        if (line.startsWith('## ')) {
+            if (inside) {
+                break
+            }
+            inside = line.substring(3).trim() == ver
+        } else if (inside) {
+            section.add(line)
+        }
+    }
+    String entry = section.join('\n').trim()
+    if (entry.isEmpty()) {
+        throw new GradleException("CHANGELOG.md has no entry for ${ver}")
+    }
+    return entry
+}
+
+def modrinthToken = providers.environmentVariable('MODRINTH_TOKEN').orElse(providers.gradleProperty('modrinthToken'))
+def curseforgeToken = providers.environmentVariable('CURSEFORGE_TOKEN').orElse(providers.gradleProperty('curseforgeToken'))
+def rehearsal = !modrinthToken.present && !curseforgeToken.present
+
+publishMods {
+    file = tasks.jar.archiveFile
+    version = mod_version
+    displayName = "${mod_name} ${mod_version}"
+    changelog = providers.fileContents(rootProject.layout.projectDirectory.file('CHANGELOG.md')).asText.map { changelogFor(it, mod_version) }
+    type = mod_version.contains('alpha') ? ALPHA : (mod_version.contains('beta') ? BETA : STABLE)
+    modLoaders.add('neoforge')
+    dryRun = rehearsal
+
+    if (modrinth_project_id && (rehearsal || modrinthToken.present)) {
+        modrinth {
+            projectId = modrinth_project_id
+            accessToken = modrinthToken
+            minecraftVersions.add(minecraft_version)
+            requires('create')
+            optional('copycats')
+        }
+    }
+
+    if (curseforge_project_id && (rehearsal || curseforgeToken.present)) {
+        curseforge {
+            projectId = curseforge_project_id
+            accessToken = curseforgeToken
+            minecraftVersions.add(minecraft_version)
+            javaVersions.add(JavaVersion.VERSION_21)
+            clientRequired = true
+            serverRequired = true
+            requires('create')
+            optional('copycats')
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name in ['publishMods', 'publishModrinth', 'publishCurseforge']) {
+        notCompatibleWithConfigurationCache('the changelog reads project properties at run time')
+    }
+}
